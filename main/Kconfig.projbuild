@@ -1,0 +1,27 @@
+menu "Maryati Bridge Configuration"
+
+    choice MB_BUTTON_SCHEME_CHOICE
+        prompt "Button scheme"
+        default MB_BUTTON_SCHEME_1
+        help
+            Select how many physical buttons drive the OLED menu.
+            1 = BOOT button only (short press cycles, 2s long press applies,
+                10s ultra-long press factory resets).
+            2 = NEXT + SELECT/BOOT.
+            3 = UP + DOWN + SELECT/BOOT.
+
+        config MB_BUTTON_SCHEME_1
+            bool "1 Button (BOOT)"
+        config MB_BUTTON_SCHEME_2
+            bool "2 Buttons (NEXT + SELECT)"
+        config MB_BUTTON_SCHEME_3
+            bool "3 Buttons (UP + DOWN + SELECT)"
+    endchoice
+
+    config MB_BUTTON_SCHEME
+        int
+        default 1 if MB_BUTTON_SCHEME_1
+        default 2 if MB_BUTTON_SCHEME_2
+        default 3 if MB_BUTTON_SCHEME_3
+
+endmenu

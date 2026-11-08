@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maryati Bridge</title>
+<style>
+  :root {
+    --bg: #0f1216;
+    --panel: #171d24;
+    --line: #263140;
+    --text: #e6edf3;
+    --muted: #8b98a8;
+    --accent: #37b6a8;
+    --warn: #d98b3a;
+    --bad: #d9534f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px;
+    background: var(--bg); color: var(--text);
+    font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em;
+       color: var(--muted); margin: 0 0 12px; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px; margin-bottom: 16px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; }
+  .row > * { flex: 1 1 200px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input, select, button {
+    font: inherit; color: var(--text); background: #0d1117;
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%;
+  }
+  button {
+    background: var(--accent); border: 0; color: #06231f; font-weight: 600;
+    cursor: pointer; width: auto; padding: 9px 16px;
+  }
+  button.secondary { background: #2a3644; color: var(--text); }
+  button.danger { background: var(--bad); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat { background: #0d1117; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .stat .v { font-size: 17px; font-weight: 600; word-break: break-all; }
+  .mode-badge { display: inline-block; padding: 2px 8px; border-radius: 999px;
+                background: #0d1117; border: 1px solid var(--line); font-size: 12px; }
+  #toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    background: #0d1117; border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    border-radius: 8px; padding: 10px 16px; display: none; max-width: 90vw;
+  }
+  #toast.error { border-left-color: var(--bad); }
+  #toast.warn { border-left-color: var(--warn); }
+  .hint { color: var(--muted); font-size: 12px; }
+  .hidden { display: none !important; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Maryati Bridge</h1>
+  <p class="hint">Dashboard lokal &mdash; gunakan password Wi-Fi yang tampil di layar OLED.</p>
+
+  <section id="login" class="panel">
+    <h2>Masuk</h2>
+    <div class="row">
+      <div>
+        <label for="pass">Password Wi-Fi</label>
+        <input id="pass" type="password" autocomplete="current-password" placeholder="8 karakter">
+      </div>
+      <div style="align-self: end;">
+        <button id="loginBtn">Masuk</button>
+      </div>
+    </div>
+    <p class="hint">Password disimpan hanya di tab browser ini (sessionStorage).</p>
+  </section>
+
+  <div id="app" class="hidden">
+    <section class="panel">
+      <h2>Status <span id="modeBadge" class="mode-badge">-</span></h2>
+      <div class="grid">
+        <div class="stat"><div class="k">SSID</div><div class="v" id="sSsid">-</div></div>
+        <div class="stat"><div class="k">Mode</div><div class="v" id="sMode">-</div></div>
+        <div class="stat"><div class="k">Klien</div><div class="v" id="sClients">-</div></div>
+        <div class="stat"><div class="k">Host IP</div><div class="v" id="sHost">-</div></div>
+        <div class="stat"><div class="k">Proxy</div><div class="v" id="sProxy">-</div></div>
+        <div class="stat"><div class="k">Uptime</div><div class="v" id="sUptime">-</div></div>
+        <div class="stat"><div class="k">USB RX/TX</div><div class="v" id="sUsb">-</div></div>
+        <div class="stat"><div class="k">Wi-Fi RX/TX</div><div class="v" id="sWifi">-</div></div>
+        <div class="stat"><div class="k">Free heap</div><div class="v" id="sHeap">-</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Ganti Mode</h2>
+      <div class="actions">
+        <button class="secondary" data-mode="0">0 &middot; P2P Proxy</button>
+        <button class="secondary" data-mode="1">1 &middot; Transparent Bridge</button>
+        <button class="secondary" data-mode="2">2 &middot; Enterprise Stealth</button>
+      </div>
+      <p class="hint">Mode 1/2 butuh script bridge di PC Host agar lalu lintas L2 sampai ke LAN.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Konfigurasi</h2>
+      <form id="cfgForm">
+        <div class="row">
+          <div>
+            <label for="useStatic">Kredensial</label>
+            <select id="useStatic">
+              <option value="0">Acak tiap boot</option>
+              <option value="1">Statis (di bawah)</option>
+            </select>
+          </div>
+          <div>
+            <label for="staticSsid">Static SSID</label>
+            <input id="staticSsid" maxlength="31">
+          </div>
+          <div>
+            <label for="staticPass">Static Password (min 8)</label>
+            <input id="staticPass" maxlength="63">
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <label for="bootMode">Mode saat boot</label>
+            <select id="bootMode">
+              <option value="0">0 &middot; P2P Proxy</option>
+              <option value="1">1 &middot; Transparent Bridge</option>
+              <option value="2">2 &middot; Enterprise Stealth</option>
+            </select>
+          </div>
+          <div>
+            <label for="txPower">TX power (dBm)</label>
+            <input id="txPower" type="number" min="8" max="20">
+          </div>
+          <div>
+            <label for="customMac">Custom MAC (spoof)</label>
+            <input id="customMac" placeholder="00:E0:4C:68:01:02">
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <label for="enableMsc">USB Mass Storage</label>
+            <select id="enableMsc">
+              <option value="1">Aktif (tampil drive)</option>
+              <option value="0">Mati (stealth / bypass DLP)</option>
+            </select>
+          </div>
+          <div>
+            <label for="hiddenSsid">Hidden SSID</label>
+            <select id="hiddenSsid">
+              <option value="0">Tidak</option>
+              <option value="1">Ya</option>
+            </select>
+          </div>
+          <div>
+            <label for="usbVid">USB VID</label>
+            <input id="usbVid" placeholder="0x0BDA">
+          </div>
+          <div>
+            <label for="usbPid">USB PID</label>
+            <input id="usbPid" placeholder="0x8152">
+          </div>
+        </div>
+        <div class="actions" style="margin-top:14px;">
+          <button type="submit">Simpan</button>
+          <span class="hint">VID/PID baru berlaku setelah reboot.</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Tindakan</h2>
+      <div class="actions">
+        <button class="secondary" id="rotateBtn">Rotate SSID &amp; Password</button>
+        <button class="danger" id="resetBtn">Factory Reset Filesystem</button>
+      </div>
+      <p class="hint">Rotate memutus klien dan membuat kredensial acak baru. Factory reset memformat partisi FAT dan mengembalikan file default.</p>
+    </section>
+
+    <p class="actions"><button class="secondary" id="logoutBtn">Keluar</button></p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var MODE_NAMES = ["P2P_PROXY", "TRANSPARENT", "ENTERPRISE_STEALTH"];
+  var KEY = "mb_pass";
+  var token = sessionStorage.getItem(KEY) || "";
+  var timer = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function toast(msg, kind) {
+    var el = $("toast");
+    el.textContent = msg;
+    el.className = kind || "";
+    el.style.display = "block";
+    setTimeout(function () { el.style.display = "none"; }, 4000);
+  }
+
+  function api(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    }, opts.headers || {});
+    return fetch(path, opts).then(function (res) {
+      if (res.status === 401) {
+        logout();
+        throw new Error("Password salah / sesi berakhir");
+      }
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    });
+  }
+
+  function login() {
+    var pass = $("pass").value.trim();
+    if (pass.length < 8) {
+      toast("Password minimal 8 karakter", "warn");
+      return;
+    }
+    token = pass;
+    sessionStorage.setItem(KEY, token);
+    showApp();
+  }
+
+  function logout() {
+    token = "";
+    sessionStorage.removeItem(KEY);
+    if (timer) { clearInterval(timer); timer = null; }
+    $("app").classList.add("hidden");
+    $("login").classList.remove("hidden");
+    $("pass").value = "";
+  }
+
+  function showApp() {
+    $("login").classList.add("hidden");
+    $("app").classList.remove("hidden");
+    refreshStatus();
+    loadConfig();
+    if (timer) { clearInterval(timer); }
+    timer = setInterval(refreshStatus, 3000);
+  }
+
+  function fmt(n) {
+    return (n === undefined || n === null) ? "-" : String(n);
+  }
+
+  function refreshStatus() {
+    api("/api/status").then(function (s) {
+      $("sSsid").textContent = fmt(s.ssid);
+      $("sMode").textContent = fmt(s.mode) + " / " + fmt(s.mode_name);
+      $("sClients").textContent = fmt(s.connected_clients) + " / 4";
+      $("sHost").textContent = fmt(s.host_ip);
+      $("sProxy").textContent = s.proxy_active ? "aktif" : "mati";
+      $("sUptime").textContent = fmt(s.uptime_sec) + " s";
+      $("sUsb").textContent = fmt(s.usb_rx) + " / " + fmt(s.usb_tx);
+      $("sWifi").textContent = fmt(s.wifi_rx) + " / " + fmt(s.wifi_tx);
+      $("sHeap").textContent = fmt(s.free_heap) + " B";
+      $("modeBadge").textContent = "Mode " + fmt(s.mode) + " - " + fmt(s.mode_name);
+    }).catch(function (err) {
+      toast(err.message, "error");
+    });
+  }
+
+  function setSelect(id, value) {
+    $(id).value = String(value);
+  }
+
+  function loadConfig() {
+    api("/api/config").then(function (c) {
+      setSelect("useStatic", c.use_static_cred ? 1 : 0);
+      $("staticSsid").value = c.static_ssid || "";
+      $("staticPass").value = c.static_pass || "";
+      setSelect("bootMode", c.default_boot_mode);
+      setSelect("enableMsc", c.enable_msc ? 1 : 0);
+      setSelect("hiddenSsid", c.hidden_ssid ? 1 : 0);
+      $("txPower").value = c.tx_power_dbm;
+      $("customMac").value = c.custom_mac || "";
+      $("usbVid").value = typeof c.usb_vid === "number"
+        ? "0x" + c.usb_vid.toString(16).toUpperCase().padStart(4, "0")
+        : (c.usb_vid || "");
+      $("usbPid").value = typeof c.usb_pid === "number"
+        ? "0x" + c.usb_pid.toString(16).toUpperCase().padStart(4, "0")
+        : (c.usb_pid || "");
+    }).catch(function (err) {
+      toast(err.message, "error");
+    });
+  }
+
+  function setMode(mode) {
+    api("/api/mode", { method: "POST", body: JSON.stringify({ mode: mode }) })
+      .then(function (r) {
+        toast("Mode aktif: " + r.active_mode, "");
+        refreshStatus();
+      }).catch(function (err) { toast(err.message, "error"); });
+  }
+
+  $("cfgForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var body = {
+      use_static_cred: $("useStatic").value === "1",
+      static_ssid: $("staticSsid").value.trim(),
+      static_pass: $("staticPass").value,
+      default_boot_mode: parseInt($("bootMode").value, 10),
+      enable_msc: $("enableMsc").value === "1",
+      hidden_ssid: $("hiddenSsid").value === "1",
+      tx_power_dbm: parseInt($("txPower").value, 10),
+      custom_mac: $("customMac").value.trim(),
+      usb_vid: parseInt($("usbVid").value, 0),
+      usb_pid: parseInt($("usbPid").value, 0)
+    };
+    api("/api/config", { method: "POST", body: JSON.stringify(body) })
+      .then(function (r) { toast("Konfigurasi: " + r.status, ""); })
+      .catch(function (err) { toast(err.message, "error"); });
+  });
+
+  function action(name, confirmText) {
+    if (!window.confirm(confirmText)) { return; }
+    api("/api/action", { method: "POST", body: JSON.stringify({ action: name }) })
+      .then(function (r) { toast("Tindakan: " + r.status, "warn"); })
+      .catch(function (err) { toast(err.message, "error"); });
+  }
+
+  document.querySelectorAll("[data-mode]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      setMode(parseInt(btn.getAttribute("data-mode"), 10));
+    });
+  });
+
+  $("loginBtn").addEventListener("click", login);
+  $("pass").addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter") { login(); }
+  });
+  $("logoutBtn").addEventListener("click", logout);
+  $("rotateBtn").addEventListener("click", function () {
+    action("rotate_credentials", "Rotate SSID & password? Semua klien Wi-Fi akan terputus.");
+  });
+  $("resetBtn").addEventListener("click", function () {
+    action("factory_reset", "Factory reset partisi FAT? Semua file dan konfigurasi kembali ke default.");
+  });
+
+  if (token) {
+    showApp();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+build/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+.ninja_deps
+.ninja_log
+compile_commands.json
+managed_components/
+build_s2/
+build_s3/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# Python 
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+
+# macOS
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go 
+tools/host_proxy/proxy_win.exe
+tools/host_proxy/proxy_linux
+tools/host_proxy/proxy_mac
+
+# FAT
+fatfs.bin
+partitions_*.bin

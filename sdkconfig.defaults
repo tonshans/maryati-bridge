@@ -1,0 +1,29 @@
+# Maryati Bridge - common defaults (both targets)
+
+# CPU / FreeRTOS
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_FREERTOS_HZ=1000
+
+# FAT filesystem: 512-byte sectors/clusters keep FatFS off FAT12 on the small S2
+# storage partition (see fs_healing.c).
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_MAX_LFN=64
+CONFIG_FATFS_SECTOR_512=y
+CONFIG_WL_SECTOR_SIZE_512=y
+
+# Wi-Fi SoftAP with WPA2/WPA3 + PMF support
+CONFIG_ESP_WIFI_SOFTAP_SUPPORT=y
+CONFIG_ESP_WIFI_ENABLE_WPA3_SAE=y
+CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT=y
+
+# LwIP DHCP server (customised at runtime in wifi_bridge.c)
+CONFIG_LWIP_DHCPS=y
+CONFIG_LWIP_DHCPS_MAX_STATION_NUM=4
+
+# TinyUSB composite: CDC-NCM + optional MSC (runtime config in usb_composite.c)
+CONFIG_TINYUSB_NET_MODE_NCM=y
+CONFIG_TINYUSB_MSC_ENABLED=y
+CONFIG_TINYUSB_MSC_MOUNT_PATH="/usb"
+
+# Logging
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y

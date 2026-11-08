@@ -1,0 +1,29 @@
+# ============================================================
+#  Maryati Bridge - config.txt
+#  Dibaca ESP32 saat boot. Perubahan di sini dibaca setelah reboot.
+#  Baris diawali '#' atau ';' adalah komentar.
+# ============================================================
+
+# 1 = pakai static_ssid/static_pass di bawah, 0 = kredensial acak tiap boot
+use_static=0
+static_ssid=MaryatiLab
+static_pass=Diagnostic2026
+
+# Mode boot: 0 = P2P Proxy, 1 = Transparent Bridge, 2 = Enterprise Stealth
+default_mode=0
+
+# 1 = tampilkan drive USB (MSC), 0 = sembunyikan drive (Mode stealth / bypass DLP)
+enable_msc=1
+
+# 1 = SSID disembunyikan (otomatis disembunyikan saat Mode 2)
+hidden_ssid=0
+
+# Daya pancar Wi-Fi dalam dBm: 8 (hemat, dekat) sampai 20 (maksimum)
+tx_power_dbm=20
+
+# MAC spoofing untuk Mode 2 (harus MAC unicast yang valid)
+custom_mac=00:E0:4C:68:01:02
+
+# Identitas USB agar tampak seperti dongle Ethernet komersial
+usb_vid=0x0BDA
+usb_pid=0x8152
