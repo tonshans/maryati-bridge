@@ -1,6 +1,6 @@
 # Maryati Bridge
 
-Maryati Bridge adalah alat diagnostik jaringan dan jembatan Layer-2 (Transparent USB-to-Wi-Fi LAN Bridge) berbasis mikrokontroler ESP32-S3 atau ESP32-S2. Alat ini dirancang untuk menjembatani perangkat Wi-Fi (seperti laptop teknisi, PC kedua, atau alat uji) agar bisa masuk secara transparan ke dalam jaringan LAN kabel milik sebuah PC Host lewat antarmuka USB.
+Maryati Bridge adalah alat bantu diagnostik jaringan dan jembatan Layer-2 (Transparent USB-to-Wi-Fi LAN Bridge) berbasis mikrokontroler ESP32-S3 atau ESP32-S2. Alat ini dirancang untuk menjembatani perangkat Wi-Fi (seperti laptop teknisi, PC kedua, atau alat uji) agar bisa masuk secara transparan ke dalam jaringan LAN kabel milik sebuah PC Host lewat antarmuka USB.
 
 Fungsinya persis seperti kamu mencolokkan kabel LAN langsung ke switch atau router fisik, tetapi semuanya dilakukan secara nirkabel dari sisi klien Wi-Fi.
 
@@ -28,7 +28,7 @@ Mode ini membuat perangkat Wi-Fi kamu benar-benar tembus ke jaringan LAN utama. 
 * LwIP DHCP Server dimatikan seketika untuk mencegah bentrok IP (Rogue DHCP) di jaringan asli.
 * Mendukung penuh: DHCP Passthrough (dapat IP langsung dari router asli), ARP, IPv4 Unicast/Broadcast, Multicast, IPv6, TCP, dan ICMP.
 
-### Mode 2: Enterprise Stealth Bridge (Pertahanan Korporat)
+### Mode 2: Enterprise Stealth Bridge
 
 Mode khusus untuk beroperasi di jaringan dengan security yang ketat.
 * Bypass Switch Port Security (MAC NAT): Switch enterprise biasanya memblokir port jika ada lebih dari 1 MAC address. Mode ini mengubah (spoofing) MAC address asal semua paket menjadi satu MAC tunggal milik USB.
